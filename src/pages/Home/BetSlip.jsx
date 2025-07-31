@@ -6,12 +6,23 @@ const BetSlip = ({
   handleStartGame,
   isAtLeastOneBoxWin,
   handleCashOut,
+  setMinesCount,
+  minesCount,
+  activeBoxCount,
 }) => {
+  const mineRisk = (minesCount / (25 - activeBoxCount)) * 100;
   return (
     <>
       <div className="game-betslip">
-        {isAtLeastOneBoxWin && isStartGame ? (
-          <div onClick={handleCashOut} className="game-betslip__buttons">
+        {isStartGame ? (
+          <div
+            onClick={handleCashOut}
+            className={`game-betslip__buttons ${
+              isAtLeastOneBoxWin
+                ? "opacity-100 cursor-pointer"
+                : "opacity-50 pointer-events-none"
+            }`}
+          >
             <div className="btn-new _cashout">
               <div className="btn-bg _bg1"></div>
               <div className="btn-bg _bg11"></div>
@@ -29,27 +40,6 @@ const BetSlip = ({
                       </div>
                     </div>
                     <div className="indicator _cashout"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : isStartGame ? (
-          <div onClick={handleStartGame} className="game-betslip__buttons">
-            <div className="btn-new _cancel">
-              <div className="btn-bg _bg1"></div>
-              <div className="btn-bg _bg11"></div>
-              <div className="btn-new__border">
-                <div className="btn-bg _bg2"></div>
-                <div className="btn-bg _bg22"></div>
-                <div className="btn-new__inner">
-                  <div className="btn-bg _bg1"></div>
-                  <div className="btn-bg _bg11"></div>
-                  <div className="btn-new__text">
-                    <div className="text-wrapper">
-                      <div className="text">Cancel</div>
-                    </div>
-                    <div className="indicator _cancel"></div>
                   </div>
                 </div>
               </div>
@@ -127,32 +117,56 @@ const BetSlip = ({
         </div>
         <div className="settings-input__wrapper _mines">
           <div className="settings-input__wrapper-inner">
-            <div data-track className="button _sm">
+            <div
+              onClick={() => setMinesCount(3)}
+              data-track
+              className="button _sm"
+            >
               <div className="button__inner">
                 <div className="button__text">3</div>
               </div>
             </div>
-            <div data-track className="button _sm">
+            <div
+              onClick={() => setMinesCount(5)}
+              data-track
+              className="button _sm"
+            >
               <div className="button__inner">
                 <div className="button__text">5</div>
               </div>
             </div>
-            <div data-track className="button _sm">
+            <div
+              onClick={() => setMinesCount(10)}
+              data-track
+              className="button _sm"
+            >
               <div className="button__inner">
                 <div className="button__text">10</div>
               </div>
             </div>
-            <div data-track className="button _sm">
+            <div
+              onClick={() => setMinesCount(20)}
+              data-track
+              className="button _sm"
+            >
               <div className="button__inner">
                 <div className="button__text">20</div>
               </div>
             </div>
-            <div data-track className="button _sm _golden">
+            <div
+              onClick={() => setMinesCount((prev) => prev - 1)}
+              data-track
+              className="button _sm _golden"
+            >
               <div className="button__inner">
                 <div className="button__text">-</div>
               </div>
             </div>
-            <div data-track className="button _sm _golden">
+            <div
+              onClick={() => setMinesCount((prev) => prev + 1)}
+              data-track
+              className="button _sm _golden"
+            >
               <div className="button__inner">
                 <div className="button__text">+</div>
               </div>
@@ -167,6 +181,7 @@ const BetSlip = ({
                 spellCheck="false"
                 tabIndex={-1}
                 className="games-input__number"
+                value={minesCount}
               />
             </div>
           </div>
@@ -178,17 +193,24 @@ const BetSlip = ({
               <div className="game-details__row">
                 <div className="game-details__row-icon _crystal" />
                 <div className="game-details__row-text">Gems left</div>
-                <div className="game-details__row-value">0</div>
+                <div className="game-details__row-value">
+                  {25 - minesCount - activeBoxCount}
+                </div>
               </div>
               <div className="game-details__row">
                 <div className="game-details__row-icon _mine" />
                 <div className="game-details__row-text">Mine risk:</div>
-                <div className="game-details__row-value">0%</div>
+
+                <div className="game-details__row-value">
+                  {mineRisk?.toFixed(2)}%
+                </div>
               </div>
               <div className="game-details__row">
                 <div className="game-details__row-icon _tiles" />
                 <div className="game-details__row-text">Opened tiles</div>
-                <div className="game-details__row-value">0/25</div>
+                <div className="game-details__row-value">
+                  {activeBoxCount}/{25 - minesCount}
+                </div>
               </div>
             </div>
           </div>

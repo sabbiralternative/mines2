@@ -10,22 +10,39 @@ const Boxes = ({
   showWinModal,
   betAmount,
   setShowWarning,
+  activeBoxCount,
+  addOrder,
 }) => {
   const [loadingBoxId, setLoadingBoxId] = useState(null);
 
-  const handleBoxClick = (box) => {
+  const handleBoxClick = async (box) => {
     if (isStartGame) {
       setLoadingBoxId(box.id);
-      setTimeout(() => {
+
+      const round_id = sessionStorage.getItem("round_id");
+      const payload = [
+        {
+          round_id: Number(round_id),
+          type: "select_box",
+          box_id: box?.id,
+          box_count: activeBoxCount,
+          eventId: 20002,
+        },
+      ];
+      const res = await addOrder(payload).unwrap();
+
+      if (res.success) {
         setLoadingBoxId(null);
-        if (box.mine) {
-          const updatedBoxes = boxData?.map((boxObj) => ({
+        if (res?.gem === 0) {
+          const updatedBoxes = boxData?.map((boxObj, i) => ({
             ...boxObj,
             roundEnd: true,
-            win: boxObj?.mine ? false : true,
-            showBox: boxObj.mine ? false : boxObj.win ? false : true,
-            isBombOpacityFull:
-              boxObj.mine && box.id === boxObj.id ? true : false,
+            mine: res?.all?.[i] === 0 ? true : false,
+            isOpacityFull:
+              res.gem === 0 && box.id === boxObj.id
+                ? true
+                : boxObj?.isOpacityFull,
+            win: res?.all?.[i] === 0 ? false : true,
           }));
           setBoxData(updatedBoxes);
           setIsStartGame(false);
@@ -35,14 +52,13 @@ const Boxes = ({
               ? {
                   ...boxObj,
                   win: true,
-                  showBox: false,
-                  isWinOpacityFull: true,
+                  isOpacityFull: true,
                 }
               : boxObj
           );
           setBoxData(updatedBoxes);
         }
-      }, 300);
+      }
     } else {
       setShowWarning(true);
       setTimeout(() => {
@@ -50,8 +66,6 @@ const Boxes = ({
       }, 2000);
     }
   };
-
-  console.log(loadingBoxId);
 
   return (
     <div className="chart-wrapper">
@@ -68,17 +82,13 @@ const Boxes = ({
                   "game-tile",
                   box?.win && "_active _win",
                   loadingBoxId === box?.id && "_loading",
-                  box?.roundEnd &&
-                    box?.mine &&
-                    box?.isBombOpacityFull &&
-                    "_active _lose _opened !opacity-100",
-                  box?.roundEnd &&
-                    box?.mine &&
-                    !box?.isBombOpacityFull &&
-                    "_active _lose opacity-50",
-                  box?.roundEnd && box?.isWinOpacityFull && box?.win
-                    ? "opacity-100"
-                    : "opacity-50"
+                  box?.roundEnd && box?.mine && "_active _lose",
+                  // box?.roundEnd &&
+                  //   box?.mine &&
+                  //   box?.isOpacityFull &&
+                  //   " _opened",
+
+                  box?.isOpacityFull ? "opacity-100 " : "opacity-50"
                 )}
               >
                 <div className="game-tile__inner-possible-win">$1.08</div>

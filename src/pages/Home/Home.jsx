@@ -5,24 +5,28 @@ import Navbar from "./Navbar";
 import GameHistory from "./GameHistory";
 import GameModeTab from "./GameModeTab";
 import Statistic from "./Statistic";
+import { generateRoundId } from "../../utils/generateRoundId";
+import { useOrderMutation } from "../../redux/features/events/events";
+import toast from "react-hot-toast";
 
 const Home = () => {
+  const [addOrder] = useOrderMutation();
+  const [minesCount, setMinesCount] = useState(1);
   const [betAmount, setBetAmount] = useState(100);
   const [isStartGame, setIsStartGame] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+
   const initialBoxData = Array.from({ length: 25 }, (_, i) => ({
     name: `box${i + 1}`,
     id: i + 1,
-    mine: (i + 1) % 5 === 0,
-    showBox: true,
     win: false,
     roundEnd: false,
-    isBombOpacityFull: false,
-    isWinOpacityFull: false,
+    isOpacityFull: false,
   }));
   const [boxData, setBoxData] = useState(initialBoxData);
   const isAtLeastOneBoxWin = boxData.some((box) => box.win);
+  const activeBoxCount = boxData.filter((box) => box.win).length;
 
   const handleChangeBetAmount = (type) => {
     if (type === "minus") {
@@ -45,18 +49,64 @@ const Home = () => {
     }
   };
 
-  const handleStartGame = () => {
-    setIsStartGame((prev) => !prev);
-    setBoxData(initialBoxData);
+  const handleStartGame = async () => {
+    if (betAmount) {
+      setBoxData(initialBoxData);
+
+      const round_id = generateRoundId();
+      sessionStorage.removeItem("round_id");
+      sessionStorage.setItem("round_id", round_id);
+      const payload = [
+        {
+          eventId: 20002,
+          eventName: "Mines",
+          isback: 0,
+          stake: betAmount,
+          type: "bet",
+          mines_count: minesCount,
+          round_id,
+        },
+      ];
+      const res = await addOrder(payload).unwrap();
+      if (res?.success) {
+        // setIsBetPlaced(true);
+        setIsStartGame(true);
+        setTimeout(() => {
+          let recentResult = [];
+          const recentStoredResult = localStorage.getItem("recentResult");
+          if (recentStoredResult) {
+            recentResult = JSON.parse(recentStoredResult);
+          }
+          //push
+          localStorage.setItem("recentResult", JSON.stringify(recentResult));
+        }, 500);
+      } else {
+        // setIsBetPlaced(true);
+        setIsStartGame(true);
+        toast.error(res?.Message);
+      }
+    } else {
+      toast.error("Amount is required");
+    }
   };
 
   const handleCashOut = async () => {
-    const findBoxAndChange = boxData?.map((boxObj) => ({
+    const round_id = sessionStorage.getItem("round_id");
+    const payload = [
+      {
+        round_id: Number(round_id),
+        type: "cashout",
+        box_count: activeBoxCount,
+        eventId: 20002,
+      },
+    ];
+    const findBoxAndChange = boxData?.map((boxObj, i) => ({
       ...boxObj,
-      win: boxObj?.mine ? false : boxObj.win,
+      win: i === 4 ? false : true,
+      mine: i === 4 ? true : false,
       roundEnd: true,
-      showBox: boxObj.mine ? false : boxObj.win ? false : true,
     }));
+    await addOrder(payload).unwrap();
 
     setBoxData(findBoxAndChange);
     setIsStartGame(false);
@@ -79,6 +129,8 @@ const Home = () => {
           <GameHistory />
           <GameModeTab />
           <Boxes
+            addOrder={addOrder}
+            activeBoxCount={activeBoxCount}
             setShowWarning={setShowWarning}
             betAmount={betAmount}
             isStartGame={isStartGame}
@@ -88,6 +140,9 @@ const Home = () => {
             showWinModal={showWinModal}
           />
           <BetSlip
+            activeBoxCount={activeBoxCount}
+            setMinesCount={setMinesCount}
+            minesCount={minesCount}
             betAmount={betAmount}
             handleCashOut={handleCashOut}
             handleChangeBetAmount={handleChangeBetAmount}
