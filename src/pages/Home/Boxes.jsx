@@ -14,6 +14,9 @@ const Boxes = ({
   addOrder,
   selectedBoxes,
   setSelectedBoxes,
+  setCurrentMultiplier,
+  current_multiplier,
+  winMultiplier,
 }) => {
   const [loadingBoxId, setLoadingBoxId] = useState(null);
 
@@ -35,6 +38,8 @@ const Boxes = ({
       const res = await addOrder(payload).unwrap();
 
       if (res.success) {
+        const multiplier = Number(res?.current_multiplier) * betAmount;
+        setCurrentMultiplier(multiplier.toFixed(2));
         setSelectedBoxes((prev) => [...prev, box?.id]);
         setLoadingBoxId(null);
         if (res?.gem === 0) {
@@ -74,7 +79,12 @@ const Boxes = ({
   return (
     <div className="chart-wrapper">
       <div className="table-holder">
-        {showWinModal && <WinModal betAmount={betAmount} />}
+        {showWinModal && (
+          <WinModal
+            current_multiplier={current_multiplier}
+            winMultiplier={winMultiplier}
+          />
+        )}
 
         <div className={cn("game-tiles", isStartGame && "_active")}>
           {boxData?.map((box) => {

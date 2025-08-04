@@ -1,4 +1,4 @@
-const WinModal = ({ betAmount }) => {
+const WinModal = ({ winMultiplier, current_multiplier }) => {
   return (
     <div className="win-screen">
       <div className="win-screen__head">You win!</div>
@@ -7,11 +7,11 @@ const WinModal = ({ betAmount }) => {
           className="win-screen__content-payout"
           style={{ fontSize: "23px" }}
         >
-          {betAmount}
+          {current_multiplier}
         </div>
         <div className="win-screen__content-footer">
           <div className="win-screen__content-text">Multiplier</div>
-          <div className="win-screen__content-odd">x1.08</div>
+          <div className="win-screen__content-odd">x{winMultiplier}</div>
         </div>
       </div>
     </div>

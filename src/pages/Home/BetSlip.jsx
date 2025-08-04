@@ -9,6 +9,7 @@ const BetSlip = ({
   setMinesCount,
   minesCount,
   activeBoxCount,
+  current_multiplier,
 }) => {
   const mineRisk = (minesCount / (25 - activeBoxCount)) * 100;
   return (
@@ -36,7 +37,7 @@ const BetSlip = ({
                     <div className="text-wrapper">
                       <div className="text">Cash Out</div>
                       <div className="_small">
-                        <span className="_roboto">$108.00</span>
+                        <span className="_roboto">{current_multiplier}</span>
                       </div>
                     </div>
                     <div className="indicator _cashout"></div>

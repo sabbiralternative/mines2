@@ -19,6 +19,8 @@ const Home = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [selectedBoxes, setSelectedBoxes] = useState([]);
+  const [current_multiplier, setCurrentMultiplier] = useState(0);
+  const [winMultiplier, setWinMultiplier] = useState(null);
 
   const initialBoxData = Array.from({ length: 25 }, (_, i) => ({
     name: `box${i + 1}`,
@@ -54,6 +56,7 @@ const Home = () => {
 
   const handleStartGame = async () => {
     if (betAmount) {
+      setWinMultiplier(null);
       setBoxData(initialBoxData);
       setSelectedBoxes([]);
       const round_id = generateRoundId();
@@ -72,6 +75,8 @@ const Home = () => {
       ];
       const res = await addOrder(payload).unwrap();
       if (res?.success) {
+        const multiplier = Number(res?.current_multiplier) * betAmount;
+        setCurrentMultiplier(multiplier.toFixed(2));
         handleAuth();
         setIsStartGame(true);
         setTimeout(() => {
@@ -106,6 +111,7 @@ const Home = () => {
 
     const res = await addOrder(payload).unwrap();
     if (res?.success) {
+      setWinMultiplier(res?.win_multiplier);
       handleAuth();
       const findBoxAndChange = boxData?.map((boxObj, i) => ({
         ...boxObj,
@@ -135,6 +141,9 @@ const Home = () => {
           <GameHistory />
           {/* <GameModeTab /> */}
           <Boxes
+            winMultiplier={winMultiplier}
+            current_multiplier={current_multiplier}
+            setCurrentMultiplier={setCurrentMultiplier}
             setSelectedBoxes={setSelectedBoxes}
             selectedBoxes={selectedBoxes}
             addOrder={addOrder}
@@ -148,6 +157,7 @@ const Home = () => {
             showWinModal={showWinModal}
           />
           <BetSlip
+            current_multiplier={current_multiplier}
             activeBoxCount={activeBoxCount}
             setMinesCount={setMinesCount}
             minesCount={minesCount}
