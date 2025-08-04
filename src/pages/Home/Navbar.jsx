@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/auth";
 import { useEffect } from "react";
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
-import { IoMicSharp } from "react-icons/io5";
+import { IoMicOffSharp, IoMicSharp } from "react-icons/io5";
 
 const Navbar = () => {
   const { sound, setSound } = useSound();
@@ -44,7 +44,7 @@ const Navbar = () => {
         <div onClick={handleSoundToggle} className="game-header__button">
           <div className="game-header__button--inner undefined">
             {/* <i className="iconFont iconFont-sound" /> */}
-            <IoMicSharp />
+            {sound ? <IoMicSharp /> : <IoMicOffSharp />}
           </div>
         </div>
         <div data-track="settings" className="game-header__button">

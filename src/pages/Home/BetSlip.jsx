@@ -1,3 +1,6 @@
+import { useSound } from "../../context/ApiProvider";
+import { playDifficultySound } from "../../utils/sound";
+
 const BetSlip = ({
   betAmount,
   setBetAmount,
@@ -11,6 +14,7 @@ const BetSlip = ({
   activeBoxCount,
   current_multiplier,
 }) => {
+  const { sound } = useSound();
   const mineRisk = (minesCount / (25 - activeBoxCount)) * 100;
   return (
     <>
@@ -119,7 +123,12 @@ const BetSlip = ({
         <div className="settings-input__wrapper _mines">
           <div className="settings-input__wrapper-inner">
             <div
-              onClick={() => setMinesCount(3)}
+              onClick={() => {
+                setMinesCount(3);
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm"
             >
@@ -128,7 +137,12 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() => setMinesCount(5)}
+              onClick={() => {
+                setMinesCount(5);
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm"
             >
@@ -137,7 +151,12 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() => setMinesCount(10)}
+              onClick={() => {
+                setMinesCount(10);
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm"
             >
@@ -146,7 +165,12 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() => setMinesCount(20)}
+              onClick={() => {
+                setMinesCount(20);
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm"
             >
@@ -155,9 +179,12 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() =>
-                setMinesCount((prev) => (prev > 1 ? prev - 1 : prev))
-              }
+              onClick={() => {
+                setMinesCount((prev) => (prev > 1 ? prev - 1 : prev));
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm _golden"
             >
@@ -166,9 +193,12 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() =>
-                setMinesCount((prev) => (prev < 24 ? prev + 1 : prev))
-              }
+              onClick={() => {
+                setMinesCount((prev) => (prev < 24 ? prev + 1 : prev));
+                if (sound) {
+                  playDifficultySound();
+                }
+              }}
               data-track
               className="button _sm _golden"
             >

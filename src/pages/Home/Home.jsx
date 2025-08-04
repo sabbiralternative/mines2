@@ -9,8 +9,15 @@ import { generateRoundId } from "../../utils/generateRoundId";
 import { useOrderMutation } from "../../redux/features/events/events";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/auth";
+import { useSound } from "../../context/ApiProvider";
+import {
+  playButtonSound,
+  playCashOutSound,
+  playWinSound,
+} from "../../utils/sound";
 
 const Home = () => {
+  const { sound } = useSound();
   const { mutate: handleAuth } = useAuth();
   const [addOrder] = useOrderMutation();
   const [minesCount, setMinesCount] = useState(1);
@@ -20,6 +27,7 @@ const Home = () => {
   const [showWarning, setShowWarning] = useState(false);
   const [selectedBoxes, setSelectedBoxes] = useState([]);
   const [current_multiplier, setCurrentMultiplier] = useState(0);
+  const [next_multiplier, setNextMultiplier] = useState(0);
   const [winMultiplier, setWinMultiplier] = useState(null);
 
   const initialBoxData = Array.from({ length: 25 }, (_, i) => ({
@@ -56,6 +64,9 @@ const Home = () => {
 
   const handleStartGame = async () => {
     if (betAmount) {
+      if (sound) {
+        playButtonSound();
+      }
       setWinMultiplier(null);
       setBoxData(initialBoxData);
       setSelectedBoxes([]);
@@ -77,6 +88,7 @@ const Home = () => {
       if (res?.success) {
         const multiplier = Number(res?.current_multiplier) * betAmount;
         setCurrentMultiplier(multiplier.toFixed(2));
+        setNextMultiplier(res?.next_multiplier);
         handleAuth();
         setIsStartGame(true);
         setTimeout(() => {
@@ -110,7 +122,11 @@ const Home = () => {
     ];
 
     const res = await addOrder(payload).unwrap();
+
     if (res?.success) {
+      if (sound) {
+        playCashOutSound();
+      }
       setWinMultiplier(res?.win_multiplier);
       handleAuth();
       const findBoxAndChange = boxData?.map((boxObj, i) => ({
@@ -122,6 +138,11 @@ const Home = () => {
       setBoxData(findBoxAndChange);
       setIsStartGame(false);
       setShowWinModal(true);
+      setTimeout(() => {
+        if (sound) {
+          playWinSound();
+        }
+      }, 500);
 
       setTimeout(() => {
         setShowWinModal(false);
@@ -141,6 +162,8 @@ const Home = () => {
           <GameHistory />
           {/* <GameModeTab /> */}
           <Boxes
+            next_multiplier={next_multiplier}
+            setNextMultiplier={setNextMultiplier}
             winMultiplier={winMultiplier}
             current_multiplier={current_multiplier}
             setCurrentMultiplier={setCurrentMultiplier}

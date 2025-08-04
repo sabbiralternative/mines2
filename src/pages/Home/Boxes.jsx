@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { cn } from "../../utils/cn";
 import WinModal from "./WinModal";
+import { useSound } from "../../context/ApiProvider";
+import {
+  playBombSound,
+  playDiamond1Sound,
+  playDiamond2Sound,
+  playDiamond3Sound,
+  playTileClickSound,
+} from "../../utils/sound";
 
 const Boxes = ({
   isStartGame,
@@ -17,11 +25,17 @@ const Boxes = ({
   setCurrentMultiplier,
   current_multiplier,
   winMultiplier,
+  setNextMultiplier,
+  next_multiplier,
 }) => {
+  const { sound } = useSound();
   const [loadingBoxId, setLoadingBoxId] = useState(null);
 
   const handleBoxClick = async (box) => {
     if (isStartGame) {
+      if (sound) {
+        playTileClickSound();
+      }
       setLoadingBoxId(box.id);
 
       const round_id = sessionStorage.getItem("round_id");
@@ -38,11 +52,12 @@ const Boxes = ({
       const res = await addOrder(payload).unwrap();
 
       if (res.success) {
-        const multiplier = Number(res?.current_multiplier) * betAmount;
-        setCurrentMultiplier(multiplier.toFixed(2));
         setSelectedBoxes((prev) => [...prev, box?.id]);
         setLoadingBoxId(null);
         if (res?.gem === 0) {
+          if (sound) {
+            playBombSound();
+          }
           const updatedBoxes = boxData?.map((boxObj, i) => ({
             ...boxObj,
             roundEnd: true,
@@ -56,6 +71,18 @@ const Boxes = ({
           setBoxData(updatedBoxes);
           setIsStartGame(false);
         } else {
+          const multiplier = Number(res?.current_multiplier) * betAmount;
+          setCurrentMultiplier(multiplier.toFixed(2));
+          setNextMultiplier(res?.next_multiplier);
+          if (sound) {
+            if (box?.id > 0 && box?.id < 6) {
+              playDiamond1Sound();
+            } else if (box?.id > 5 && box?.id < 11) {
+              playDiamond2Sound();
+            } else {
+              playDiamond3Sound();
+            }
+          }
           const updatedBoxes = boxData?.map((boxObj) =>
             box?.id === boxObj.id
               ? {
@@ -105,7 +132,9 @@ const Boxes = ({
                   box?.isOpacityFull ? "opacity-100 " : "opacity-50"
                 )}
               >
-                <div className="game-tile__inner-possible-win">$1.08</div>
+                <div className="game-tile__inner-possible-win">
+                  {next_multiplier}x
+                </div>
                 <div className="game-tile__inner">
                   {box?.win && <div className="diamond"></div>}
                   {box?.roundEnd && box?.mine && (
