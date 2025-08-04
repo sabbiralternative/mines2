@@ -8,14 +8,17 @@ import Statistic from "./Statistic";
 import { generateRoundId } from "../../utils/generateRoundId";
 import { useOrderMutation } from "../../redux/features/events/events";
 import toast from "react-hot-toast";
+import { useAuth } from "../../hooks/auth";
 
 const Home = () => {
+  const { mutate: handleAuth } = useAuth();
   const [addOrder] = useOrderMutation();
   const [minesCount, setMinesCount] = useState(1);
   const [betAmount, setBetAmount] = useState(100);
   const [isStartGame, setIsStartGame] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [selectedBoxes, setSelectedBoxes] = useState([]);
 
   const initialBoxData = Array.from({ length: 25 }, (_, i) => ({
     name: `box${i + 1}`,
@@ -52,7 +55,7 @@ const Home = () => {
   const handleStartGame = async () => {
     if (betAmount) {
       setBoxData(initialBoxData);
-
+      setSelectedBoxes([]);
       const round_id = generateRoundId();
       sessionStorage.removeItem("round_id");
       sessionStorage.setItem("round_id", round_id);
@@ -69,7 +72,7 @@ const Home = () => {
       ];
       const res = await addOrder(payload).unwrap();
       if (res?.success) {
-        // setIsBetPlaced(true);
+        handleAuth();
         setIsStartGame(true);
         setTimeout(() => {
           let recentResult = [];
@@ -81,8 +84,7 @@ const Home = () => {
           localStorage.setItem("recentResult", JSON.stringify(recentResult));
         }, 500);
       } else {
-        // setIsBetPlaced(true);
-        setIsStartGame(true);
+        setIsStartGame(false);
         toast.error(res?.Message);
       }
     } else {
@@ -98,27 +100,31 @@ const Home = () => {
         type: "cashout",
         box_count: activeBoxCount,
         eventId: 20002,
+        selected_tiles: selectedBoxes,
       },
     ];
-    const findBoxAndChange = boxData?.map((boxObj, i) => ({
-      ...boxObj,
-      win: i === 4 ? false : true,
-      mine: i === 4 ? true : false,
-      roundEnd: true,
-    }));
-    await addOrder(payload).unwrap();
 
-    setBoxData(findBoxAndChange);
-    setIsStartGame(false);
-    setShowWinModal(true);
+    const res = await addOrder(payload).unwrap();
+    if (res?.success) {
+      handleAuth();
+      const findBoxAndChange = boxData?.map((boxObj, i) => ({
+        ...boxObj,
+        win: res?.all?.[i] === 1 ? true : false,
+        mine: res?.all?.[i] === 0 ? true : false,
+        roundEnd: true,
+      }));
+      setBoxData(findBoxAndChange);
+      setIsStartGame(false);
+      setShowWinModal(true);
 
-    setTimeout(() => {
-      setShowWinModal(false);
-    }, 2000);
+      setTimeout(() => {
+        setShowWinModal(false);
+      }, 2000);
 
-    setTimeout(() => {
-      setBoxData(initialBoxData);
-    }, 2500);
+      setTimeout(() => {
+        setBoxData(initialBoxData);
+      }, 2500);
+    }
   };
 
   return (
@@ -129,6 +135,8 @@ const Home = () => {
           <GameHistory />
           <GameModeTab />
           <Boxes
+            setSelectedBoxes={setSelectedBoxes}
+            selectedBoxes={selectedBoxes}
             addOrder={addOrder}
             activeBoxCount={activeBoxCount}
             setShowWarning={setShowWarning}
