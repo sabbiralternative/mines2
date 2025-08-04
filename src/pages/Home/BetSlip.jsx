@@ -154,7 +154,9 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() => setMinesCount((prev) => prev - 1)}
+              onClick={() =>
+                setMinesCount((prev) => (prev > 1 ? prev - 1 : prev))
+              }
               data-track
               className="button _sm _golden"
             >
@@ -163,7 +165,9 @@ const BetSlip = ({
               </div>
             </div>
             <div
-              onClick={() => setMinesCount((prev) => prev + 1)}
+              onClick={() =>
+                setMinesCount((prev) => (prev < 24 ? prev + 1 : prev))
+              }
               data-track
               className="button _sm _golden"
             >
@@ -209,7 +213,7 @@ const BetSlip = ({
                 <div className="game-details__row-icon _tiles" />
                 <div className="game-details__row-text">Opened tiles</div>
                 <div className="game-details__row-value">
-                  {activeBoxCount}/{25 - minesCount}
+                  {activeBoxCount}/25
                 </div>
               </div>
             </div>

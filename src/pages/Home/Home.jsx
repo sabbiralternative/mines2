@@ -3,7 +3,7 @@ import BetSlip from "./BetSlip";
 import Boxes from "./Boxes";
 import Navbar from "./Navbar";
 import GameHistory from "./GameHistory";
-import GameModeTab from "./GameModeTab";
+// import GameModeTab from "./GameModeTab";
 import Statistic from "./Statistic";
 import { generateRoundId } from "../../utils/generateRoundId";
 import { useOrderMutation } from "../../redux/features/events/events";
@@ -133,7 +133,7 @@ const Home = () => {
         <Navbar />
         <div className="game-container">
           <GameHistory />
-          <GameModeTab />
+          {/* <GameModeTab /> */}
           <Boxes
             setSelectedBoxes={setSelectedBoxes}
             selectedBoxes={selectedBoxes}
@@ -171,7 +171,7 @@ const Home = () => {
           )}
         </div>
       </div>
-      <div className="demo-label _demo" />
+      {/* <div className="demo-label _demo" /> */}
     </div>
   );
 };
