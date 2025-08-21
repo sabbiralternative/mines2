@@ -15,8 +15,10 @@ import {
   playCashOutSound,
   playWinSound,
 } from "../../utils/sound";
+import { useSelector } from "react-redux";
 
 const Home = () => {
+  const errorMessage = sessionStorage.getItem("errorMessage");
   const { sound } = useSound();
   const { mutate: handleAuth } = useAuth();
   const [addOrder] = useOrderMutation();
@@ -29,6 +31,7 @@ const Home = () => {
   const [current_multiplier, setCurrentMultiplier] = useState(0);
   const [next_multiplier, setNextMultiplier] = useState(0);
   const [winMultiplier, setWinMultiplier] = useState(null);
+  const { token } = useSelector((state) => state.auth);
 
   const initialBoxData = Array.from({ length: 25 }, (_, i) => ({
     name: `box${i + 1}`,
@@ -89,7 +92,7 @@ const Home = () => {
         const multiplier = Number(res?.current_multiplier) * betAmount;
         setCurrentMultiplier(multiplier.toFixed(2));
         setNextMultiplier(res?.next_multiplier);
-        handleAuth();
+        handleAuth(token);
         setIsStartGame(true);
         setTimeout(() => {
           let recentResult = [];
@@ -128,7 +131,7 @@ const Home = () => {
         playCashOutSound();
       }
       setWinMultiplier(res?.win_multiplier);
-      handleAuth();
+      handleAuth(token);
       const findBoxAndChange = boxData?.map((boxObj, i) => ({
         ...boxObj,
         win: res?.all?.[i] === 1 ? true : false,
@@ -153,8 +156,8 @@ const Home = () => {
       }, 2500);
     }
   };
-
-  return (
+  console.log(token);
+  return token ? (
     <div id="app" className="mines">
       <div id="post-message-size" className="game-wrapper demo">
         <Navbar />
@@ -205,6 +208,13 @@ const Home = () => {
         </div>
       </div>
       {/* <div className="demo-label _demo" /> */}
+    </div>
+  ) : (
+    <div className="error-container">
+      <div className="alert alert-danger text-center m-0 " role="alert">
+        {errorMessage ||
+          "URL parameters are missing or invalid. Key: token | Value"}
+      </div>
     </div>
   );
 };
