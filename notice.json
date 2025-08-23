@@ -7,7 +7,7 @@
     "settings": {
       "siteTitle": "Mines 2",
       "disabledDevtool": false,
-      "baseUrl": "/mines2",
+      "baseUrl": "",
       "lobby": "https://aura365.io"
     },
 
